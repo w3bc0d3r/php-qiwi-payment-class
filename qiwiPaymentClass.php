@@ -82,12 +82,54 @@
 			}
 			return 1;
 		}
+
+		//1 today 2 yesterday 3 week
+		public function history ($type)
+		{
+			curl_setopt ($this -> curl, CURLOPT_URL, 'https://qiwi.com/user/report/list.action');
+			curl_setopt ($this -> curl, CURLOPT_POST, 1);
+			curl_setopt ($this -> curl, CURLOPT_POSTFIELDS, 'type='.$type);
+			curl_setopt ($this -> curl, CURLOPT_HTTPHEADER,
+				array (
+					'User-Agent Mozilla/5.0 (Windows NT 5.1; rv:38.0) Gecko/20100101 Firefox/38.0',
+					'Accept:"text/html, */*; q=0.01"',
+					'Accept-Language:"en-US,en;q=0.5"',
+					'Accept-Encoding: deflate',
+					'Content-Type: application/x-www-form-urlencoded; charset=UTF-8',
+					'X-Requested-With: XMLHttpRequest',
+					'Referer: https://qiwi.com/report/list.action?type='.$type,
+					'Connection: keep-alive'
+				)
+			);
+			$cont = curl_exec ($this -> curl);
+			if (preg_match_all ('|<div class="DateWithTransaction">.*<span class="date">(.*)</span>.*<span class="time">(.*)</span>.*<div class="transaction">(.*)</div>.*</div>|Usi', $cont, $dateWithTransaction) &&
+			preg_match_all ('|<div class="IncomeWithExpend (.*)">.*<div class="cash">(.*)</div>|Usi', $cont, $incomeWithExpend) &&
+			preg_match_all ('|<div class="ProvWithComment">.*<div class="provider">.*<span class="opNumber">(.*)</span>.*</div>.*<div class="comment">(.*)</div>|Usi', $cont, $provWithComment))
+			{
+				for ($i = 0; $i<count ($dateWithTransaction); $i++)
+				{
+					$history [] = array (
+						'date' => trim ($dateWithTransaction [1][$i]),
+						'time' => trim ($dateWithTransaction [2][$i]),
+						'transaction' => trim ($dateWithTransaction [3][$i]),
+						'type' => trim ($incomeWithExpend [1][$i]),
+						'cash' => preg_replace('|[^0-9]|', '', $incomeWithExpend [2][$i]),
+						'number' => trim ($provWithComment [1][$i]),
+						'comment' => trim ($provWithComment [2][$i])
+					);
+				}
+				return $history;
+			} else {
+				return 0;
+			}
+		}
 	}
 
 	$qiwi = new qiwiPaymentClass;
-	if ($qiwi -> auth ('+380688935000', '00000000') == 1)
+	if ($qiwi -> auth ('+380983700000', '00000000') == 1)
 	{
 		echo 'authorized!';
+		print_r ($qiwi -> history (3));
 	} else {
 		echo 'error!';
 	}
