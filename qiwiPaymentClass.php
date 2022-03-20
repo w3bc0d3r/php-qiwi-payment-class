@@ -106,7 +106,7 @@
 			preg_match_all ('|<div class="IncomeWithExpend (.*)">.*<div class="cash">(.*)</div>|Usi', $cont, $incomeWithExpend) &&
 			preg_match_all ('|<div class="ProvWithComment">.*<div class="provider">.*<span class="opNumber">(.*)</span>.*</div>.*<div class="comment">(.*)</div>|Usi', $cont, $provWithComment))
 			{
-				for ($i = 0; $i<count ($dateWithTransaction); $i++)
+				for ($i = 0; $i<count ($dateWithTransaction[3]); $i++)
 				{
 					$history [] = array (
 						'date' => trim ($dateWithTransaction [1][$i]),
